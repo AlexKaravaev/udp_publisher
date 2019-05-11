@@ -37,4 +37,5 @@ class Input_Topic: Input
     private:
         std::string pub_topic_name_;
 };
+
 #endif
