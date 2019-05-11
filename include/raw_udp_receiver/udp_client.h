@@ -9,8 +9,10 @@
 #include <ros/ros.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include "std_msgs/Int8MultiArray.h"
 #include <poll.h>
+
+#include "std_msgs/Int8MultiArray.h"
+#include "std_msgs/MultiArrayDimension.h"
 
 /** Base input class for socket/playback listening**/
 namespace udp_receiver{
