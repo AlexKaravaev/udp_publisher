@@ -22,6 +22,11 @@ catkin_package(CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
                LIBRARIES input)
 
 add_subdirectory(src/lib)
+
+add_executable(udp_receiver_node src/udp_receiver_node.cc)
+target_link_libraries(udp_receiver_node ${catkin_LIBRARIES})
+
+
 # Compile all
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
@@ -29,4 +34,3 @@ install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
 install(PROGRAMS src/vdump
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-

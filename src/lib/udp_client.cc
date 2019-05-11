@@ -9,8 +9,8 @@ namespace udp_receiver{
   **/
   Input_Socket::Input_Socket(ros::NodeHandle nh): Input(nh){
     //Load port number
-    if (nh_.getParam("port_number", port_)){
-      ROS_INFO("Retrived port number [%d]", port_);
+    if (ros::param::get("~port_number", port_)){
+      ROS_INFO("Retrieved port number [%d]", port_);
     }
     else {
       ROS_ERROR("Failed to retrieve port number");
@@ -18,8 +18,8 @@ namespace udp_receiver{
     }
 
     //Load device ip
-    if (nh_.getParam("device_ip", device_ip_str_)){
-      ROS_INFO("Retrived device_ip [%s]", device_ip_str_.c_str());
+    if (ros::param::get("~device_ip", device_ip_str_)){
+      ROS_INFO("Retrieved device_ip [%s]", device_ip_str_.c_str());
     }
     else {
       ROS_ERROR("Failed to retrieve device ip");
@@ -27,8 +27,8 @@ namespace udp_receiver{
     }
 
     //Load published topic name
-    if (nh_.getParam("udp_topic", pub_topic_name_)){
-      ROS_INFO("Retrived udp topic name [%s]", pub_topic_name_.c_str());
+    if (ros::param::get("~udp_topic", pub_topic_name_)){
+      ROS_INFO("Retrieved udp topic name [%s]", pub_topic_name_.c_str());
     }
     else {
       ROS_ERROR("Failed to retrieve topic name");
@@ -142,6 +142,11 @@ namespace udp_receiver{
     return 0;
 
 
+  }
+
+  Input_Socket::~Input_Socket(void)
+  {
+    (void) close(sockfd_);
   }
 
     //Load

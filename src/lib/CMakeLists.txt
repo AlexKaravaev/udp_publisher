@@ -1,4 +1,4 @@
-add_library(input udp_receiver_node.cc)
+add_library(input udp_client.cc)
 target_link_libraries(input
     ${catkin_LIBRARIES})
 

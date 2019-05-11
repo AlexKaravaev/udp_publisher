@@ -1,0 +1,13 @@
+<launch>
+
+<arg name="device_ip" default="127.0.0.1" />
+<arg name="port_number" default="54000" />
+<arg name="udp_topic" default="udp_data" />
+
+<node pkg="raw_udp_receiver" name="udp_receiver_node" type="udp_receiver_node" output="screen">
+  <param name="device_ip" value="$(arg device_ip)" />
+  <param name="port_number" type="int" value="$(arg port_number)" />
+  <param name="udp_topic" value="$(arg udp_topic)" />
+</node>
+
+</launch>

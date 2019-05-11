@@ -21,9 +21,8 @@ namespace udp_receiver{
   {
       public:
           Input(ros::NodeHandle nh);
-          virtual ~Input(){};
-          // virtual function to get packet from socket/topic and publish it to another topic
-          virtual int getData();
+          ~Input(){};
+          int getData();
 
       protected:
           ros::NodeHandle nh_;
@@ -34,7 +33,7 @@ namespace udp_receiver{
   {
       public:
           Input_Socket(ros::NodeHandle nh);
-          ~Input_Socket(){};
+          ~Input_Socket();
           int getData();
       private:
           int sockfd_;
