@@ -11,30 +11,32 @@ namespace udp_receiver{
 
     //Load port number
     if (ros::param::get("~port_number", port_)){
-      ROS_INFO("Retrieved port number [%d]", port_);
+      ROS_INFO("[%s] Retrieved port number %d", ros::this_node::getName().c_str(), port_);
     }
     else {
-      ROS_ERROR("Failed to retrieve port number");
+      ROS_ERROR("[%s] Failed to retrieve port number", ros::this_node::getName().c_str());
       return;
     }
 
     //Load device ip
     if (ros::param::get("~device_ip", device_ip_str_)){
-      ROS_INFO("Retrieved device_ip [%s]", device_ip_str_.c_str());
+      ROS_INFO("[%s] Retrieved device_ip %s", ros::this_node::getName().c_str(), device_ip_str_.c_str());
     }
     else {
-      ROS_ERROR("Failed to retrieve device ip");
+      ROS_ERROR("[%s] Failed to retrieve device ip", ros::this_node::getName().c_str());
       return;
     }
 
     //Load published topic name
     if (ros::param::get("~udp_topic", pub_topic_name_)){
-      ROS_INFO("Retrieved udp topic name [%s]", pub_topic_name_.c_str());
+      ROS_INFO("[%s] Retrieved udp topic name %s", ros::this_node::getName().c_str(), pub_topic_name_.c_str());
     }
     else {
-      ROS_ERROR("Failed to retrieve topic name");
+      ROS_ERROR("[%s] Failed to retrieve topic name", ros::this_node::getName().c_str());
       return;
     }
+
+    ROS_INFO("[%s] succesfully initialized", ros::this_node::getName().c_str());
 
     // Create publisher
     socket_pub_ = nh.advertise<std_msgs::Int8MultiArray>(pub_topic_name_, 5);
@@ -44,12 +46,12 @@ namespace udp_receiver{
 
     inet_aton(device_ip_str_.c_str(), &devip_);
 
-    ROS_INFO("Opening UDP socket at port [%d]", port_);
+    ROS_INFO("[%s] Opening UDP socket at port %d", ros::this_node::getName().c_str(), port_);
 
     sockfd_ = socket(AF_INET, SOCK_DGRAM, 0);
 
     if (sockfd_ == -1){
-      ROS_ERROR("Failed to open UDP socket");
+      ROS_ERROR("[%s] Failed to open UDP socket", ros::this_node::getName().c_str());
       return;
     }
 
@@ -62,18 +64,18 @@ namespace udp_receiver{
 
     // Bind socket to ip
     if (bind(sockfd_, (sockaddr *)&local_addr, sizeof(sockaddr)) == -1){
-      ROS_ERROR("Failed to bind socket to port-[%d]", port_);
+      ROS_ERROR("[%s] Failed to bind socket to port %d", ros::this_node::getName().c_str(), port_);
       return;
     }
 
     // Set fd for non-blocking mode
     if (fcntl(sockfd_, F_SETFL, O_NONBLOCK|FASYNC) < 0){
-      ROS_ERROR("Failed to set non-block on socket filedescriptor");
+      ROS_ERROR("[%s] Failed to set non-block on socket filedescriptor", ros::this_node::getName().c_str());
       return;
     }
 
 
-    ROS_INFO("Socket filedescriptor set to [%d]", sockfd_);
+    ROS_INFO("[%s] Socket filedescriptor set to %d", ros::this_node::getName().c_str(), sockfd_);
   }
 
   // Get data from socket and forward it to topic
@@ -98,17 +100,17 @@ namespace udp_receiver{
         int retval = poll(fds, 1, POLL_TIMEOUT);
         if (retval < 0){
           if (errno != EINTR)
-            ROS_ERROR("poll() error [%s]", strerror(errno));
+            ROS_ERROR("[%s] poll() error %s", ros::this_node::getName().c_str(), strerror(errno));
           return -1;
         }
         if (retval == 0)
         {
-          ROS_WARN("poll() timeout");
+          ROS_WARN("[%s] poll() timeout", ros::this_node::getName().c_str());
         }
         if ((fds[0].revents & POLLERR)
          || (fds[0].revents & POLLHUP)
          || (fds[0].revents & POLLNVAL)){
-           ROS_ERROR("device_error");
+           ROS_ERROR("[%s] Device_error", ros::this_node::getName().c_str());
            return -1;
         }
       } while((fds[0].revents & POLLIN) == 0);
@@ -120,7 +122,7 @@ namespace udp_receiver{
       //Check if read was succesfull
       if(nbytes < 0 ){
         if (errno != EWOULDBLOCK){
-          ROS_ERROR("recv failed");
+          ROS_ERROR("[%s] recv failed",ros::this_node::getName().c_str());
           return -1;
         }
       }
@@ -136,7 +138,7 @@ namespace udp_receiver{
         socket_data_msg.data.insert(socket_data_msg.data.end(), buffer.begin(), buffer.end());
 
         socket_pub_.publish(socket_data_msg);
-        ROS_INFO("Published [%ld] bytes from socket to topic", nbytes);
+        ROS_INFO("[%s] Published %ld bytes from socket to topic", ros::this_node::getName().c_str(), nbytes);
         break;
       }
 
@@ -156,20 +158,23 @@ namespace udp_receiver{
   Input_Topic::Input_Topic(ros::NodeHandle nh): Input(nh){
     //Load subscribed topic
     if (ros::param::get("~playback_topic", sub_topic_name_)){
-      ROS_INFO("Retrieved port number [%s]", sub_topic_name_.c_str());
+      ROS_INFO("[%s] Retrieved playback topic name %s", ros::this_node::getName().c_str(), sub_topic_name_.c_str());
     }
     else {
       ROS_ERROR("Failed to retrieve playback topic name");
       return;
     }
-
+    ROS_INFO("[%s] succesfully initialized", ros::this_node::getName().c_str());
     playback_sub_ = nh_.subscribe(sub_topic_name_, 5, dataReceived);
 
   }
 
   void Input_Topic::dataReceived(const std_msgs::Int8MultiArray& socket_data_msg){
-    ROS_INFO("Received data");
-
+    ROS_INFO("[%s] Got bytes from topic: ",ros::this_node::getName().c_str());
+    for(std::vector<signed char>::const_iterator it = socket_data_msg.data.begin(); it != socket_data_msg.data.end(); it++){
+      std::cout << *it << ' ';
+    }
+    std::cout << "\n";
   }
   int Input_Topic::getData(){
     ros::spin();
@@ -180,6 +185,5 @@ namespace udp_receiver{
   {
   }
 
-    //Load
 
 }

@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <iterator>
 
 #include "std_msgs/Int8MultiArray.h"
 #include "std_msgs/MultiArrayDimension.h"
