@@ -5,8 +5,7 @@ int main(int argc, char **argv){
 
   ros::NodeHandle nh;
 
-  udp_receiver::Input_Socket is(nh);
-
+  udp_receiver::Input is(nh, "socket");
 
 
   ros::Rate loop_rate(10);

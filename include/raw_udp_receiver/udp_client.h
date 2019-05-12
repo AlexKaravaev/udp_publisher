@@ -1,19 +1,12 @@
 #ifndef UDP_CLIENT_H
 #define UDP_CLIENT_H
 
-#include <iostream>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <string>
 #include <netinet/in.h>
 #include <ros/ros.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <iterator>
 
 #include "std_msgs/Int8MultiArray.h"
-#include "std_msgs/MultiArrayDimension.h"
+
 
 /** Base input class for socket/playback listening**/
 namespace udp_receiver{
@@ -21,39 +14,28 @@ namespace udp_receiver{
   class Input
   {
       public:
-          Input(ros::NodeHandle nh);
-          ~Input(){};
-          virtual int getData()=0;
-
-      protected:
-          ros::NodeHandle nh_;
-  };
-
-  class Input_Socket: public Input
-  {
-      public:
-          Input_Socket(ros::NodeHandle nh);
-          ~Input_Socket();
+          Input(ros::NodeHandle nh, std::string mode);
+          ~Input();
           int getData();
+          
+          /*
+            dataReceived callback for udp_data
+            @ param if playback mode - std_msgs::Int8MultiArray& socket_data_msg
+                    if live mode - std::vector<signed char>& socket_data_msg
+          */
+          template<typename T> void dataReceived(const T& socket_data_msg);
       private:
+          std::string mode_;
+          ros::NodeHandle nh_;
           int sockfd_;
           int port_;
           in_addr devip_;
           std::string pub_topic_name_;
           ros::Publisher socket_pub_;
           std::string device_ip_str_;
+          std::string sub_topic_name_;
+          ros::Subscriber playback_sub_;
   };
 
-  class Input_Topic: public Input
-  {
-      public:
-        Input_Topic(ros::NodeHandle nh);
-        ~Input_Topic();
-        int getData();
-        static void dataReceived(const std_msgs::Int8MultiArray& socket_data_msg);
-      private:
-        std::string sub_topic_name_;
-        ros::Subscriber playback_sub_;
-  };
 }
 #endif

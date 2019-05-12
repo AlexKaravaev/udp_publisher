@@ -6,7 +6,7 @@ int main(int argc, char **argv){
   std::string mode;
   ros::NodeHandle nh;
 
-  udp_receiver::Input_Topic is(nh);
+  udp_receiver::Input is(nh, "playback");
 
   is.getData();
 
