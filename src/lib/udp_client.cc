@@ -31,9 +31,22 @@ namespace udp_receiver{
   template<>
   void Input::dataReceived<std::vector<signed char>>(const std::vector<signed char>& socket_data_msg){
     ROS_INFO("[%s] Got bytes", ros::this_node::getName().c_str());
+    std_msgs::Int8MultiArray data_msg;
     for(std::vector<signed char>::const_iterator it = socket_data_msg.begin(); it != socket_data_msg.end(); it++){
       std::cout << *it << ' ';
     }
+    // Construct ros_msg and publish
+
+    data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+    data_msg.layout.dim[0].size = buffer_.size();
+    data_msg.layout.dim[0].stride = 1;
+    data_msg.layout.dim[0].label = "data";
+
+    data_msg.data.clear();
+    data_msg.data.insert(data_msg.data.end(), buffer_.begin(), buffer_.end());
+
+    socket_pub_.publish(data_msg);
+    ROS_INFO("[%s] Published %ld bytes from socket to topic", ros::this_node::getName().c_str(), buffer_.size());
     std::cout << "\n";
   }
 
@@ -47,7 +60,7 @@ namespace udp_receiver{
     nh_ = nh;
     mode_ = mode;
 
-    if(mode=="socket"){
+    if(mode_=="socket"){
       //Load port number
       if (ros::param::get("~port_number", port_)){
         ROS_INFO("[%s] Retrieved port number %d", ros::this_node::getName().c_str(), port_);
@@ -113,9 +126,11 @@ namespace udp_receiver{
 
 
       ROS_INFO("[%s] Socket filedescriptor set to %d", ros::this_node::getName().c_str(), sockfd_);
+
+      buffer_.resize(5000);
     }
 
-    else if(mode=="playback"){
+    else if(mode_=="playback"){
       //Load subscribed topic
       if (ros::param::get("~playback_topic", sub_topic_name_)){
         ROS_INFO("[%s] Retrieved playback topic name %s", ros::this_node::getName().c_str(), sub_topic_name_.c_str());
@@ -135,8 +150,6 @@ namespace udp_receiver{
   // Get data from socket and forward it to topic
 
   int Input::getData(){
-    std::vector<char> buffer(5000);
-    std_msgs::Int8MultiArray socket_data_msg;
 
 
 
@@ -170,7 +183,7 @@ namespace udp_receiver{
       } while((fds[0].revents & POLLIN) == 0);
 
       // Read from socket and push_back data to vector
-      ssize_t nbytes = recvfrom(sockfd_, buffer.data(), buffer.size(),0,
+      ssize_t nbytes = recvfrom(sockfd_, buffer_.data(), buffer_.size(),0,
                                 (sockaddr*) &sender_address,&sender_address_len);
 
       //Check if read was succesfull
@@ -181,18 +194,9 @@ namespace udp_receiver{
         }
       }
       else{
-        // Construct ros_msg and publish
-        buffer.resize(nbytes);
-        socket_data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
-        socket_data_msg.layout.dim[0].size = buffer.size();
-        socket_data_msg.layout.dim[0].stride = 1;
-        socket_data_msg.layout.dim[0].label = "data";
-
-        socket_data_msg.data.clear();
-        socket_data_msg.data.insert(socket_data_msg.data.end(), buffer.begin(), buffer.end());
-
-        socket_pub_.publish(socket_data_msg);
-        ROS_INFO("[%s] Published %ld bytes from socket to topic", ros::this_node::getName().c_str(), nbytes);
+        // Call dataReceived callback
+        buffer_.resize(nbytes);
+        dataReceived<std::vector<signed char>>(buffer_);
         break;
       }
 

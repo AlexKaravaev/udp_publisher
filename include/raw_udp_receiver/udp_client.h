@@ -4,7 +4,7 @@
 #include <string>
 #include <netinet/in.h>
 #include <ros/ros.h>
-
+#include <vector>
 #include "std_msgs/Int8MultiArray.h"
 
 
@@ -16,8 +16,10 @@ namespace udp_receiver{
       public:
           Input(ros::NodeHandle nh, std::string mode);
           ~Input();
+
+          //! getData from socket
           int getData();
-          
+
           /*
             dataReceived callback for udp_data
             @ param if playback mode - std_msgs::Int8MultiArray& socket_data_msg
@@ -27,6 +29,7 @@ namespace udp_receiver{
       private:
           std::string mode_;
           ros::NodeHandle nh_;
+          std::vector<signed char> buffer_;
           int sockfd_;
           int port_;
           in_addr devip_;
