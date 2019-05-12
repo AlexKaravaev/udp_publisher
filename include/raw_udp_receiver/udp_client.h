@@ -22,11 +22,10 @@ namespace udp_receiver{
       public:
           Input(ros::NodeHandle nh);
           ~Input(){};
-          int getData();
+          virtual int getData()=0;
 
       protected:
           ros::NodeHandle nh_;
-          std::string device_ip_str_;
   };
 
   class Input_Socket: public Input
@@ -41,12 +40,19 @@ namespace udp_receiver{
           in_addr devip_;
           std::string pub_topic_name_;
           ros::Publisher socket_pub_;
+          std::string device_ip_str_;
   };
 
-  class Input_Topic: Input
+  class Input_Topic: public Input
   {
+      public:
+        Input_Topic(ros::NodeHandle nh);
+        ~Input_Topic();
+        int getData();
+        static void dataReceived(const std_msgs::Int8MultiArray& socket_data_msg);
       private:
-          std::string sub_topic_name_;
+        std::string sub_topic_name_;
+        ros::Subscriber playback_sub_;
   };
 }
 #endif

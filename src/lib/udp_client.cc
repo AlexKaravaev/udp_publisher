@@ -8,6 +8,7 @@ namespace udp_receiver{
   * @param nodehandle
   **/
   Input_Socket::Input_Socket(ros::NodeHandle nh): Input(nh){
+
     //Load port number
     if (ros::param::get("~port_number", port_)){
       ROS_INFO("Retrieved port number [%d]", port_);
@@ -81,6 +82,8 @@ namespace udp_receiver{
     std::vector<char> buffer(5000);
     std_msgs::Int8MultiArray socket_data_msg;
 
+
+
     struct pollfd fds[1];
     fds[0].fd = sockfd_;
     fds[0].events = POLLIN;
@@ -144,9 +147,37 @@ namespace udp_receiver{
 
   }
 
+
   Input_Socket::~Input_Socket(void)
   {
     (void) close(sockfd_);
+  }
+
+  Input_Topic::Input_Topic(ros::NodeHandle nh): Input(nh){
+    //Load subscribed topic
+    if (ros::param::get("~playback_topic", sub_topic_name_)){
+      ROS_INFO("Retrieved port number [%s]", sub_topic_name_.c_str());
+    }
+    else {
+      ROS_ERROR("Failed to retrieve playback topic name");
+      return;
+    }
+
+    playback_sub_ = nh_.subscribe(sub_topic_name_, 5, dataReceived);
+
+  }
+
+  void Input_Topic::dataReceived(const std_msgs::Int8MultiArray& socket_data_msg){
+    ROS_INFO("Received data");
+
+  }
+  int Input_Topic::getData(){
+    ros::spin();
+    return 0;
+  }
+
+  Input_Topic::~Input_Topic(void)
+  {
   }
 
     //Load
