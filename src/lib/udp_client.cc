@@ -17,38 +17,46 @@
 
 namespace udp_receiver{
 
-  // specialization for socket_msg
-  template<>
-  void Input::dataReceived<std_msgs::Int8MultiArray>(const std_msgs::Int8MultiArray& socket_data_msg){
-    ROS_INFO("[%s] Got bytes from topic: ",ros::this_node::getName().c_str());
-    for(std::vector<signed char>::const_iterator it = socket_data_msg.data.begin(); it != socket_data_msg.data.end(); it++){
-      std::cout << *it << ' ';
+    // specialization for raw_bytes from socket
+    template<>
+    void Input::dataReceived< std::vector<signed char> >(const std::vector<signed char>& socket_data_msg){
+      ROS_INFO("[%s] Started processing udp_raw_data", ros::this_node::getName().c_str());
+      std_msgs::Int8MultiArray data_msg;
+
+      /*    Iterate through bytes and process them
+      *     TODO: Mock for now, later implementation will be added
+      */
+      for(std::vector<signed char>::const_iterator it = socket_data_msg.begin(); it != socket_data_msg.end(); it++){
+        std::cout << *it;
+      }
+
+
+
+      // Construct ros_msg and publish to topic if in the live mode
+      if (mode_ == "socket"){
+          data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
+          data_msg.layout.dim[0].size = buffer_.size();
+          data_msg.layout.dim[0].stride = 1;
+          data_msg.layout.dim[0].label = "data";
+
+          data_msg.data.clear();
+          data_msg.data.insert(data_msg.data.end(), buffer_.begin(), buffer_.end());
+
+          socket_pub_.publish(data_msg);
+          ROS_INFO("[%s] Published %ld bytes to topic [%s]", ros::this_node::getName().c_str(), buffer_.size(), pub_topic_name_.c_str());
+          std::cout << "\n";
+      }
     }
-    std::cout << "\n";
-  }
 
-  // specialization for raw_bytes from socket
-  template<>
-  void Input::dataReceived<std::vector<signed char>>(const std::vector<signed char>& socket_data_msg){
-    ROS_INFO("[%s] Got bytes", ros::this_node::getName().c_str());
-    std_msgs::Int8MultiArray data_msg;
-    for(std::vector<signed char>::const_iterator it = socket_data_msg.begin(); it != socket_data_msg.end(); it++){
-      std::cout << *it << ' ';
+    // specialization for socket_msg
+    template<>
+    void Input::dataReceived<std_msgs::Int8MultiArray>(const std_msgs::Int8MultiArray& socket_data_msg){
+        ROS_INFO("[%s] Got bytes from topic [%s]: ",ros::this_node::getName().c_str(), sub_topic_name_.c_str());
+
+        // Forward vector of bytes to dataReceived function
+        Input::dataReceived(socket_data_msg.data);
     }
-    // Construct ros_msg and publish
 
-    data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
-    data_msg.layout.dim[0].size = buffer_.size();
-    data_msg.layout.dim[0].stride = 1;
-    data_msg.layout.dim[0].label = "data";
-
-    data_msg.data.clear();
-    data_msg.data.insert(data_msg.data.end(), buffer_.begin(), buffer_.end());
-
-    socket_pub_.publish(data_msg);
-    ROS_INFO("[%s] Published %ld bytes from socket to topic", ros::this_node::getName().c_str(), buffer_.size());
-    std::cout << "\n";
-  }
 
   /** @brief constructor for socket input
   *
@@ -127,7 +135,7 @@ namespace udp_receiver{
 
       ROS_INFO("[%s] Socket filedescriptor set to %d", ros::this_node::getName().c_str(), sockfd_);
 
-      buffer_.resize(5000);
+
     }
 
     else if(mode_=="playback"){
@@ -151,8 +159,7 @@ namespace udp_receiver{
 
   int Input::getData(){
 
-
-
+    buffer_.resize(5000);
     struct pollfd fds[1];
     fds[0].fd = sockfd_;
     fds[0].events = POLLIN;
@@ -194,9 +201,10 @@ namespace udp_receiver{
         }
       }
       else{
+
         // Call dataReceived callback
         buffer_.resize(nbytes);
-        dataReceived<std::vector<signed char>>(buffer_);
+        dataReceived< std::vector<signed char> >(buffer_);
         break;
       }
 

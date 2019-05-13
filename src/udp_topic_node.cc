@@ -8,7 +8,7 @@ int main(int argc, char **argv){
 
   udp_receiver::Input is(nh, "playback");
 
-  is.getData();
+  ros::spin();
 
   return 0;
 }

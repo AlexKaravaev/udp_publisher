@@ -22,16 +22,27 @@ namespace udp_receiver{
 
           /*
             dataReceived callback for udp_data
-            @ param if playback mode - std_msgs::Int8MultiArray& socket_data_msg
-                    if live mode - std::vector<signed char>& socket_data_msg
+            @ param if playback mode - std_msgs::Int8MultiArray& socket_data_msg {ros message from topic}
+                    if live mode - std::vector<signed char>& socket_data_msg     {raw bytes from socket}
           */
           template<typename T> void dataReceived(const T& socket_data_msg);
       private:
+          //! Mode either socket or playback
           std::string mode_;
+
+          //! Nodehandle
           ros::NodeHandle nh_;
+
+          //! buffer for reading data from socket
           std::vector<signed char> buffer_;
+
+          //! socket filedescriptor
           int sockfd_;
+
+          //! port number
           int port_;
+
+          //! device ip, default is localhost
           in_addr devip_;
           std::string pub_topic_name_;
           ros::Publisher socket_pub_;
