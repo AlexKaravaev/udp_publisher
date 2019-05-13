@@ -28,27 +28,27 @@ namespace udp_receiver{
           template<typename T> void dataReceived(const T& socket_data_msg);
       private:
           //! Mode either socket or playback
-          std::string mode_;
+          std::string m_mode;
 
           //! Nodehandle
-          ros::NodeHandle nh_;
+          ros::NodeHandle m_nh;
 
           //! buffer for reading data from socket
-          std::vector<signed char> buffer_;
+          std::vector<signed char> m_buffer;
 
           //! socket filedescriptor
-          int sockfd_;
+          int m_sockfd;
 
           //! port number
-          int port_;
+          int m_port;
 
           //! device ip, default is localhost
           in_addr devip_;
-          std::string pub_topic_name_;
-          ros::Publisher socket_pub_;
-          std::string device_ip_str_;
-          std::string sub_topic_name_;
-          ros::Subscriber playback_sub_;
+          std::string m_pub_topic_name;
+          ros::Publisher m_socket_pub;
+          std::string m_device_ip_str;
+          std::string m_sub_topic_name;
+          ros::Subscriber m_playback_sub;
   };
 
 }
