@@ -7,6 +7,17 @@
 #include <vector>
 #include "std_msgs/Int8MultiArray.h"
 
+// This is how the using code should look like
+//
+// main()
+// {
+//    rcv = new Input(nh, &PacketReceived);
+// }
+//
+// void PacketReceived(void* sender, byte[] data, int dataLength)
+// {
+//    // I'll do my data processing here...
+// }
 
 /** Base input class for socket/playback listening**/
 namespace udp_receiver{
