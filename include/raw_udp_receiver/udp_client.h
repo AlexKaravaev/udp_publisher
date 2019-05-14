@@ -1,11 +1,13 @@
 #ifndef UDP_CLIENT_H
 #define UDP_CLIENT_H
 
+#include "std_msgs/Int8MultiArray.h"
+#include <ros/ros.h>
+
 #include <string>
 #include <netinet/in.h>
-#include <ros/ros.h>
 #include <vector>
-#include "std_msgs/Int8MultiArray.h"
+#include <cstdint>
 
 // This is how the using code should look like
 //
@@ -19,33 +21,33 @@
 //    // I'll do my data processing here...
 // }
 
+namespace defaults{
+  static const int buf_size = 4096;
+}
+
 /** Base input class for socket/playback listening**/
 namespace udp_receiver{
-
   class Input
   {
       public:
-          Input(ros::NodeHandle nh, std::string mode);
+          Input(ros::NodeHandle nh, void (*processDataFcn)(void*,uint8_t*,int));
           ~Input();
 
+      private:
           //! getData from socket
           int getData();
 
-          /*
-            dataReceived callback for udp_data
-            @ param if playback mode - std_msgs::Int8MultiArray& socket_data_msg {ros message from topic}
-                    if live mode - std::vector<signed char>& socket_data_msg     {raw bytes from socket}
-          */
-          template<typename T> void dataReceived(const T& socket_data_msg);
-      private:
-          //! Mode either socket or playback
-          std::string m_mode;
+          void udpDataReceived(const char bytes, int bytesLength);
+          void udpDataReceived_cb(const std_msgs::Int8MultiArray& data_msg);
+
+          //! Mode either live socket or playback
+          bool m_playback_mode;
 
           //! Nodehandle
           ros::NodeHandle m_nh;
 
           //! buffer for reading data from socket
-          std::vector<signed char> m_buffer;
+          uint8_t m_buffer[defaults::buf_size];
 
           //! socket filedescriptor
           int m_sockfd;
@@ -55,10 +57,9 @@ namespace udp_receiver{
 
           //! device ip, default is localhost
           in_addr devip_;
-          std::string m_pub_topic_name;
+          std::string m_topic_name;
           ros::Publisher m_socket_pub;
           std::string m_device_ip_str;
-          std::string m_sub_topic_name;
           ros::Subscriber m_playback_sub;
   };
 
