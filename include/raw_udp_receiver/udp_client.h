@@ -1,13 +1,13 @@
 #ifndef UDP_CLIENT_H
 #define UDP_CLIENT_H
 
-#include "std_msgs/Int8MultiArray.h"
+#include "std_msgs/UInt8MultiArray.h"
 #include <ros/ros.h>
 
 #include <string>
-#include <netinet/in.h>
-#include <vector>
 #include <cstdint>
+#include <vector>
+#include <netinet/in.h>
 
 // This is how the using code should look like
 //
@@ -30,15 +30,15 @@ namespace udp_receiver{
   class Input
   {
       public:
-          Input(ros::NodeHandle nh, void (*processDataFcn)(void*,uint8_t*,int));
+          Input(ros::NodeHandle nh, void (*processDataFcn)(void*,std::vector<uint8_t>&,int));
           ~Input();
 
-      private:
           //! getData from socket
           int getData();
-
-          void udpDataReceived(const char bytes, int bytesLength);
-          void udpDataReceived_cb(const std_msgs::Int8MultiArray& data_msg);
+      
+      private:
+          void udpDataReceived(std::vector<uint8_t>& bytes, int dataLength);    // For raw bytes
+          void udpDataReceived_cb(const std_msgs::UInt8MultiArray& data_msg);    // For ros_msg
 
           //! Mode either live socket or playback
           bool m_playback_mode;
@@ -47,7 +47,7 @@ namespace udp_receiver{
           ros::NodeHandle m_nh;
 
           //! buffer for reading data from socket
-          uint8_t m_buffer[defaults::buf_size];
+          std::vector<uint8_t> m_buffer;
 
           //! socket filedescriptor
           int m_sockfd;
@@ -57,10 +57,13 @@ namespace udp_receiver{
 
           //! device ip, default is localhost
           in_addr devip_;
+          std::string m_device_ip_str;
+          
+          //! Ros members
           std::string m_topic_name;
           ros::Publisher m_socket_pub;
-          std::string m_device_ip_str;
           ros::Subscriber m_playback_sub;
+          const char* m_node_name;
   };
 
 }
