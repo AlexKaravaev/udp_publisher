@@ -47,7 +47,7 @@ namespace udp_receiver{
           ros::NodeHandle m_nh;
 
           //! buffer for reading data from socket
-          std::vector<uint8_t> m_buffer;
+          std::vector<uint8_t> m_buffer = std::vector<uint8_t>(defaults::buf_size,0);
 
           //! socket filedescriptor
           int m_sockfd;

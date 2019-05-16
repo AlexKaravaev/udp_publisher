@@ -9,8 +9,7 @@ int main(int argc, char **argv){
 
 
   ros::Rate loop_rate(10);
-  while (ros::ok()){
-    is.getData();
+  while (ros::ok() and is.getData() != -1){
     ros::spinOnce();
   }
 

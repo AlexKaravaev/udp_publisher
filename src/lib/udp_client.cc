@@ -29,24 +29,20 @@ namespace udp_receiver
     /*    Iterate through bytes and process them
     *     TODO: Mock for now, later implementation will be added
     */
-    // for (auto i = 0; i < dataLength; i++)
-    //   std::cout << bytes[i];
-    // for (auto elem: bytes)
-    //   std::cout << elem;
+    for (auto elem: bytes)
+      std::cout << elem;
     //---------------------------------------------------
     
     // Construct ros_msg and publish to topic if in the live mode
     if (m_playback_mode)
     {
       data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
-      data_msg.layout.dim[0].size = bytes.size();
+      data_msg.layout.dim[0].size = dataLength;
       data_msg.layout.dim[0].stride = 1;
       data_msg.layout.dim[0].label = "raw_data";
 
       data_msg.data.clear();
-      ROS_INFO("[%s] clear", m_node_name, dataLength);
-      data_msg.data.insert(data_msg.data.end(), m_buffer.begin(), m_buffer.end());
-      ROS_INFO("[%s] insert", m_node_name, dataLength);
+      data_msg.data.insert(data_msg.data.begin(), m_buffer.begin(), m_buffer.begin() + dataLength);
       m_socket_pub.publish(data_msg);
       ROS_INFO("[%s] Published %d bytes to topic [%s]", m_node_name, dataLength, m_topic_name.c_str());
       std::cout << "\n";
@@ -163,7 +159,6 @@ namespace udp_receiver
     {
       m_playback_sub = m_nh.subscribe(m_topic_name, 5, &Input::udpDataReceived_cb, this);
     }
-    m_buffer.resize(defaults::buf_size);
 
     ROS_INFO("[%s] succesfully initialized", m_node_name);
   }
@@ -198,7 +193,7 @@ namespace udp_receiver
       } while((fds[0].revents & POLLIN) == 0);
 
       // Read from socket and push_back data to vector
-      ssize_t nbytes = recvfrom(m_sockfd, &m_buffer, m_buffer.size(), 0, (sockaddr*) &sender_address,&sender_address_len);
+      ssize_t nbytes = recvfrom(m_sockfd, m_buffer.data(), m_buffer.size(), 0, (sockaddr*) &sender_address,&sender_address_len);
 
       //Check if read was succesfull
       if (nbytes < 0 )
@@ -210,7 +205,6 @@ namespace udp_receiver
       }
       else
       {
-        // Call dataReceived callback
         udpDataReceived(m_buffer, nbytes);
         break;
       }
