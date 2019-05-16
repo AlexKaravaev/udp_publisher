@@ -14,7 +14,12 @@ namespace data_processing
 {
   void processData(void* sndr,std::vector<uint8_t>& bytes,int dataLength)
   {
-
+    std::cout << "\n------------PACKET-------------\n";
+    for (auto i = 0; i < dataLength; ++i){
+      std::cout << bytes[i];
+    }
+    std::cout << "------------END----------------\n";
+    
   }
 }
 namespace udp_receiver
@@ -29,12 +34,11 @@ namespace udp_receiver
     /*    Iterate through bytes and process them
     *     TODO: Mock for now, later implementation will be added
     */
-    for (auto elem: bytes)
-      std::cout << elem;
+    processData(nullptr, bytes, dataLength);
     //---------------------------------------------------
     
     // Construct ros_msg and publish to topic if in the live mode
-    if (m_playback_mode)
+    if (!m_playback_mode)
     {
       data_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
       data_msg.layout.dim[0].size = dataLength;
@@ -51,7 +55,7 @@ namespace udp_receiver
 
   // specialization for socket_msg
   void Input::udpDataReceived_cb(const std_msgs::UInt8MultiArray& socket_data_msg){
-    ROS_INFO("[%s] Got bytes from topic [%s]: ",m_node_name, m_topic_name.c_str());
+    ROS_INFO("[%s] Got bytes from topic [%s]: ", m_node_name, m_topic_name.c_str());
     std::vector<uint8_t> topic_data(socket_data_msg.data);
     
     // Forward vector of bytes to dataReceived function
@@ -69,6 +73,7 @@ namespace udp_receiver
     // Set up members for node parameters
     m_nh = nh;
     m_node_name = ros::this_node::getName().c_str();
+    processData = processDataFcn;
 
     // Load the topic name to be used for publishing or subscribing
     if (!ros::param::get("~udp_topic", m_topic_name))
@@ -80,15 +85,16 @@ namespace udp_receiver
 
     // Load mode from parameter server.
     // Check global namespace because it can be set from another node
-    // if (!ros::param::get("~ifPlayback", m_playback_mode));
-    // {
-    //   ROS_ERROR("[%s] Failed to retrieve mode", m_node_name);
-    //   ros::shutdown();
-    //   return;
-    // }
-
+    if (!ros::param::get("ifPlayback", m_playback_mode) && !ros::param::get("~ifPlayback", m_playback_mode))
+    //ros::param::get("~ifPlayback", m_playback_mode));
+    {
+      ROS_ERROR("[%s] Failed to retrieve mode", m_node_name);
+      ros::shutdown();
+      return;
+    }
+    // m_playback_mode = false;
     // Choose class behavior
-    if (m_playback_mode)
+    if (!m_playback_mode)
     {
       // Load port_number, device_ip and udp_topic parameters
       if (!ros::param::get("~port_number", m_port))
@@ -164,7 +170,7 @@ namespace udp_receiver
   }
 
   // Get data from socket and forward it to topic
-  int Input::getData()
+  int Input::getSockData()
   {
     struct pollfd fds[1];
     fds[0].fd = m_sockfd;
@@ -175,10 +181,12 @@ namespace udp_receiver
     socklen_t sender_address_len = sizeof(sender_address);
 
     // Wait until succesfull poll from socket fd
-    while(true){
+    while(true)
+    {
       do{
         int retval = poll(fds, 1, POLL_TIMEOUT);
-        if (retval < 0){
+        if (retval < 0)
+        {
           if (errno != EINTR)
           ROS_ERROR("[%s] poll() error %s", m_node_name, strerror(errno));
           return -1;

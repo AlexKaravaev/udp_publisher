@@ -4,7 +4,7 @@
 <arg name="port_number" default="54000" />
 <arg name="udp_topic" default="udp_data" />
 <!-- mode can be "socket" or "playback" -->
-<arg name="ifplayback" default="1" />
+<arg name="ifplayback" default="false" />
 
 
 <!-- <param name="ifPlayback" type="int" value="$(arg ifPlayback)" /> -->
@@ -13,9 +13,9 @@
   <param name="device_ip" value="$(arg device_ip)" />
   <param name="port_number" type="int" value="$(arg port_number)" />
   <param name="udp_topic" value="$(arg udp_topic)" />
-  <param name="ifPlayback" type="bool" value="$(arg ifplayback)" />
 </node>
 
+<param name="ifPlayback" type="bool" value="$(arg ifplayback)" />
 <!-- <node pkg="raw_udp_receiver" name="udp_topic_node" type="udp_topic_node" output="screen">
   <param name="udp_topic" value="$(arg udp_topic)" />
   

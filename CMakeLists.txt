@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(raw_udp_receiver)
-
+add_compile_options(-std=c++11)
 
 set(${PROJECT_NAME}_CATKIN_DEPS
     roscpp

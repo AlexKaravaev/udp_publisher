@@ -9,7 +9,7 @@ int main(int argc, char **argv){
 
 
   ros::Rate loop_rate(10);
-  while (ros::ok() and is.getData() != -1){
+  while (ros::ok() and is.getSockData() != -1){
     ros::spinOnce();
   }
 

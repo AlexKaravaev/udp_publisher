@@ -33,12 +33,13 @@ namespace udp_receiver{
           Input(ros::NodeHandle nh, void (*processDataFcn)(void*,std::vector<uint8_t>&,int));
           ~Input();
 
-          //! getData from socket
-          int getData();
+          //! get Data from socket
+          int getSockData();
       
       private:
-          void udpDataReceived(std::vector<uint8_t>& bytes, int dataLength);    // For raw bytes
-          void udpDataReceived_cb(const std_msgs::UInt8MultiArray& data_msg);    // For ros_msg
+          void udpDataReceived(std::vector<uint8_t>& bytes, int dataLength);            // For raw bytes
+          void udpDataReceived_cb(const std_msgs::UInt8MultiArray& data_msg);           // For ros_msg
+          void (*processData)(void*,std::vector<uint8_t>&,int);                         // Process received data
 
           //! Mode either live socket or playback
           bool m_playback_mode;
