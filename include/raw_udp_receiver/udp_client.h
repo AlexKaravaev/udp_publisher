@@ -9,63 +9,52 @@
 #include <vector>
 #include <netinet/in.h>
 
-// This is how the using code should look like
-//
-// main()
-// {
-//    rcv = new Input(nh, &PacketReceived);
-// }
-//
-// void PacketReceived(void* sender, byte[] data, int dataLength)
-// {
-//    // I'll do my data processing here...
-// }
-
-namespace defaults{
-  static const int buf_size = 4096;
+namespace defaults
+{
+static const std::size_t buf_size = 1048576; // Setting up buffer length for 1 MB
 }
 
 /** Base input class for socket/playback listening**/
-namespace udp_receiver{
-  class Input
-  {
-      public:
-          Input(ros::NodeHandle nh, void (*processDataFcn)(void*,std::vector<uint8_t>&,int));
-          ~Input();
+namespace udp_receiver
+{
+class Input
+{
+public:
+  Input(ros::NodeHandle nh);
+  ~Input();
 
-          //! get Data from socket
-          int getSockData();
-      
-      private:
-          void udpDataReceived(std::vector<uint8_t>& bytes, int dataLength);            // For raw bytes
-          void udpDataReceived_cb(const std_msgs::UInt8MultiArray& data_msg);           // For ros_msg
-          void (*processData)(void*,std::vector<uint8_t>&,int);                         // Process received data
+  //! get Data from socket
+  int getSockData();
 
-          //! Mode either live socket or playback
-          bool m_playback_mode;
+private:
+  /** @brief construct ros_msg from buffer with given length and publish it to topic
+  *
+  * @param packet length
+  **/
+  void publishPacket(int dataLength);
 
-          //! Nodehandle
-          ros::NodeHandle m_nh;
+  //! Nodehandle
+  ros::NodeHandle m_nh;
 
-          //! buffer for reading data from socket
-          std::vector<uint8_t> m_buffer = std::vector<uint8_t>(defaults::buf_size,0);
+  //! buffer for reading data from socket
+  std::vector<uint8_t> m_buffer = std::vector<uint8_t>(defaults::buf_size, 0);
 
-          //! socket filedescriptor
-          int m_sockfd;
+  //! socket filedescriptor
+  int m_sockfd;
 
-          //! port number
-          int m_port;
+  //! port number
+  int m_port;
 
-          //! device ip, default is localhost
-          in_addr devip_;
-          std::string m_device_ip_str;
-          
-          //! Ros members
-          std::string m_topic_name;
-          ros::Publisher m_socket_pub;
-          ros::Subscriber m_playback_sub;
-          const char* m_node_name;
-  };
+  //! device ip, default is localhost
+  in_addr devip_;
+  std::string m_device_ip_str;
 
-}
+  //! Ros members
+  std::string m_topic_name;
+  ros::Publisher m_socket_pub;
+  const char *m_node_name;
+  int m_queue_size;
+};
+
+} // namespace udp_receiver
 #endif

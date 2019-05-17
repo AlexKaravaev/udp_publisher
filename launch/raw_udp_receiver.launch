@@ -1,24 +1,13 @@
 <launch>
+  <arg name="device_ip" default="127.0.0.1" />
+  <arg name="port_number" default="54000" />
+  <arg name="udp_topic" default="socket_data" />
+  <arg name="queue_size" default="1" />
 
-<arg name="device_ip" default="127.0.0.1" />
-<arg name="port_number" default="54000" />
-<arg name="udp_topic" default="udp_data" />
-<!-- mode can be "socket" or "playback" -->
-<arg name="ifplayback" default="false" />
-
-
-<!-- <param name="ifPlayback" type="int" value="$(arg ifPlayback)" /> -->
-
-<node pkg="raw_udp_receiver" name="udp_receiver_node" type="udp_receiver_node" output="screen">
-  <param name="device_ip" value="$(arg device_ip)" />
-  <param name="port_number" type="int" value="$(arg port_number)" />
-  <param name="udp_topic" value="$(arg udp_topic)" />
-</node>
-
-<param name="ifPlayback" type="bool" value="$(arg ifplayback)" />
-<!-- <node pkg="raw_udp_receiver" name="udp_topic_node" type="udp_topic_node" output="screen">
-  <param name="udp_topic" value="$(arg udp_topic)" />
-  
-</node> -->
-
+  <node pkg="raw_udp_receiver" name="udp_socket_listener" type="udp_receiver_node" output="screen" ns="udp">
+    <param name="device_ip" value="$(arg device_ip)" />
+    <param name="port_number" type="int" value="$(arg port_number)" />
+    <param name="udp_topic" value="$(arg udp_topic)" />
+    <param name="queue_size" value="$(arg queue_size) "/>
+  </node>
 </launch>

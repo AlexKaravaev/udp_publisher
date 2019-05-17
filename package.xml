@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>raw_udp_receiver</name>
-  <version>0.0.0</version>
-  <description>The raw_udp_receiver package</description>
+  <version>0.0.1</version>
+  <description>Package, that enables reading udp data from socket and forwarding it to the topic, that set in the parameter server</description>
 
-  <maintainer email="alexkaravev@gmail.com">robots</maintainer>
+  <maintainer email="alexkaravev@gmail.com">Alexandr Karavaev</maintainer>
 
   <license>TODO</license>
 
