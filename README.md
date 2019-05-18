@@ -10,12 +10,12 @@ This package enables reading from udp socket, constructing message and publishin
 
 1. Launching only this node. For example with device_ip=127.0.0.1, port_number = 54000, topic_name=socket_data, queue_size=1
 ```shell
-roslaunch raw_udp_receiver raw_udp_receiver.launch device_ip:=127.0.0.1 port_number:=54000 queue_size:=1 udp_topic:=socket_data
+roslaunch udp_publisher udp_publisher.launch device_ip:=127.0.0.1 port_number:=54000 queue_size:=1 udp_topic:=socket_data
 ```
-2. Including this roslaunch file in existing package. Just past below into existing roslaunch file.
+2. Including this roslaunch file in another package. Just past below into some existing bigger roslaunch file.
 ```xml
 
-  <include file="$(find raw_udp_receiver)/launch/udp_receiver.launch">
+  <include file="$(find udp_publisher)/launch/udp_publisher.launch">
      <arg name="device_ip" value="127.0.0.1" />
      <arg name="port_number" value="54000"/>
      <arg name="udp_topic" value="socket_data"/>

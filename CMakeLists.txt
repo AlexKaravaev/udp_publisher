@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(raw_udp_receiver)
+project(udp_publisher)
 add_compile_options(-std=c++11)
 
 set(${PROJECT_NAME}_CATKIN_DEPS
@@ -8,24 +8,22 @@ set(${PROJECT_NAME}_CATKIN_DEPS
     
 find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS})
 
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-)
+generate_messages(DEPENDENCIES std_msgs)
 
-catkin_package(CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-               INCLUDE_DIRS include
-               LIBRARIES input)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_subdirectory(src/lib)
+catkin_package(CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS})
 
-add_executable(udp_receiver_node src/udp_receiver_node.cc)
-target_link_libraries(udp_receiver_node ${catkin_LIBRARIES})
+add_executable(udp_publisher_node src/udp_publisher_node.cc src/udp_publisher.cc)
+target_link_libraries(udp_publisher_node ${catkin_LIBRARIES})
 
 # Compile all
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
-install(PROGRAMS src/vdump
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(DIRECTORY launch
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(TARGETS udp_publisher_node
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+      )

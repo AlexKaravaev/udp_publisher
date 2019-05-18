@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>raw_udp_receiver</name>
+  <name>udp_publisher</name>
   <version>0.0.1</version>
   <description>Package, that enables reading udp data from socket and forwarding it to the topic, that set in the parameter server</description>
 
